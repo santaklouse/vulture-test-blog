@@ -1,0 +1,10 @@
+/.env
+/.idea/
+/.vscode/
+/runtime/cache/*
+/runtime/compile/*
+/vendor/
+
+!/runtime/cache/.gitkeep
+!/runtime/compile/.gitkeep
+

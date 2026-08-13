@@ -1,0 +1,21 @@
+{
+    "name": "santaklouse/vulture-blog",
+    "description": "Test assignment: a blog built with plain PHP, MySQL and Smarty.",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.1",
+        "ext-pdo": "*",
+        "smarty/smarty": "^5.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}
+

@@ -1,0 +1,14 @@
+services:
+  app:
+    volumes:
+      - ./:/var/www/html
+      - composer_vendor:/var/www/html/vendor
+      - smarty_runtime:/var/www/html/runtime
+    command:
+      - sh
+      - -c
+      - composer install --no-interaction --no-progress && php-fpm
+
+volumes:
+  composer_vendor:
+  smarty_runtime:
