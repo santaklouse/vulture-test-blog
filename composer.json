@@ -8,6 +8,10 @@
         "ext-pdo": "*",
         "smarty/smarty": "^5.8"
     },
+    "require-dev": {
+        "ext-mbstring": "*",
+        "scssphp/scssphp": "^2.1"
+    },
     "autoload": {
         "psr-4": {
             "App\\": "src/"
@@ -15,7 +19,18 @@
     },
     "config": {
         "optimize-autoloader": true,
+        "platform": {
+            "php": "8.1.0"
+        },
         "sort-packages": true
+    },
+    "scripts": {
+        "scss:build": "@php bin/compile-scss.php",
+        "scss:watch": "@php bin/watch-scss.php",
+        "test": "@php tests/run.php",
+        "check": [
+            "@scss:build",
+            "@test"
+        ]
     }
 }
-

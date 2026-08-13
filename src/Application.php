@@ -4,55 +4,72 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Controller\ErrorController;
+use App\Controller\HomeController;
+use App\Http\Request;
+use App\Http\Response;
+use App\Routing\Exception\MethodNotAllowedException;
+use App\Routing\Exception\RouteNotFoundException;
+use App\Routing\Router;
+use App\View\SmartyView;
 use RuntimeException;
-use Smarty\Exception;
-use Smarty\Smarty;
+use Throwable;
 
 final class Application
 {
-    public function __construct(
-        private readonly string $projectRoot,
-    ) {
+    private readonly Router $router;
+
+    private readonly ErrorController $errorController;
+
+    public function __construct(private readonly string $projectRoot)
+    {
+        $view = new SmartyView($this->projectRoot);
+        $homeController = new HomeController($view);
+
+        $this->errorController = new ErrorController($view);
+        $this->router = new Router();
+        $this->loadRoutes($homeController);
     }
 
-    /**
-     * @throws Exception
-     */
     public function run(): void
     {
-        $smarty = $this->createSmarty();
-
-
-        $smarty->assign([
-            'pageTitle' => 'Vulture Blog',
-            'phpVersion' => PHP_VERSION,
-            'smartyVersion' => Smarty::SMARTY_VERSION,
-        ]);
-
-        $smarty->display('home.tpl');
+        $this->handle(Request::fromGlobals())->send();
     }
 
-    private function createSmarty(): Smarty
+    public function handle(Request $request): Response
     {
-        $compileDirectory = $this->projectRoot . '/runtime/compile';
-        $cacheDirectory = $this->projectRoot . '/runtime/cache';
+        try {
+            return $this->router->dispatch($request);
+        } catch (MethodNotAllowedException $exception) {
+            return $this->errorController->methodNotAllowed($request, $exception->getAllowedMethods());
+        } catch (RouteNotFoundException) {
+            return $this->errorController->notFound($request);
+        } catch (Throwable $exception) {
+            error_log(sprintf(
+                'Unhandled application exception: %s in %s:%d',
+                $exception->getMessage(),
+                $exception->getFile(),
+                $exception->getLine(),
+            ));
 
-        $this->ensureDirectoryExists($compileDirectory);
-        $this->ensureDirectoryExists($cacheDirectory);
-
-        $smarty = new Smarty();
-        $smarty->setTemplateDir($this->projectRoot . '/templates');
-        $smarty->setCompileDir($compileDirectory);
-        $smarty->setCacheDir($cacheDirectory);
-
-        return $smarty;
-    }
-
-    private function ensureDirectoryExists(string $directory): void
-    {
-        if (!is_dir($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) {
-            throw new RuntimeException(sprintf('Unable to create runtime directory: %s', $directory));
+            return $this->errorController->internalServerError($request);
         }
     }
-}
 
+    private function loadRoutes(HomeController $homeController): void
+    {
+        $routesFile = $this->projectRoot . '/config/routes.php';
+
+        if (!is_file($routesFile)) {
+            throw new RuntimeException(sprintf('Routes file not found: %s', $routesFile));
+        }
+
+        $registerRoutes = require $routesFile;
+
+        if (!is_callable($registerRoutes)) {
+            throw new RuntimeException(sprintf('Routes file must return a callable: %s', $routesFile));
+        }
+
+        $registerRoutes($this->router, $homeController);
+    }
+}

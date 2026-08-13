@@ -12,7 +12,9 @@ RUN composer install \
 
 FROM php:8.3-fpm-alpine
 
-RUN docker-php-ext-install pdo_mysql
+RUN apk add --no-cache oniguruma oniguruma-dev \
+    && docker-php-ext-install mbstring pdo_mysql \
+    && apk del oniguruma-dev
 
 WORKDIR /var/www/html
 

@@ -1,13 +1,13 @@
 # Vulture Blog
 
-A test assignment implementing a small blog with plain PHP, MySQL, and Smarty, without a PHP framework.
+A test assignment implementing a small blog with plain PHP, MySQL, Smarty, and SCSS without a PHP framework.
 
 ## Requirements
 
 - Docker Desktop with Docker Compose;
 - the TCP port configured through `WEB_PORT` must be available; it defaults to `8080`.
 
-PHP, Composer, MySQL, and Nginx do not need to be installed on the host machine.
+PHP, Composer, MySQL, Nginx do not need to be installed on the host machine.
 
 ## Development setup
 
@@ -23,7 +23,7 @@ For convenient local development, the `.env` file must contain:
 COMPOSE_FILE=compose.yaml:compose.development.yml
 ```
 
-This setting combines the base Compose configuration with `compose.development.yml`. The development override mounts the source code into the PHP container, so PHP and Smarty template changes are available without rebuilding the image. Composer dependencies and Smarty runtime files are stored in separate Docker volumes.
+This setting combines the base Compose configuration with `compose.development.yml`. The development override mounts the source code into the PHP container, so PHP, Smarty, and SCSS changes are available without rebuilding the application image. Composer dependencies and Smarty runtime files are stored in separate Docker volumes.
 
 Build and start the project:
 
@@ -31,13 +31,7 @@ Build and start the project:
 docker compose up --build -d
 ```
 
-Wait for the containers to become healthy and inspect their status:
-
-```bash
-docker compose ps
-```
-
-Open [http://localhost:8080](http://localhost:8080) in a browser.
+Open [http://localhost:8080](http://localhost:8080) in a browser. If `WEB_PORT` is changed, use the configured port instead.
 
 Follow logs from all services:
 
@@ -51,26 +45,95 @@ Stop the project:
 docker compose down
 ```
 
-## Docker services
+### Regex routes
 
-- `web` runs Nginx 1.27 and accepts requests on `127.0.0.1:${WEB_PORT}`;
-- `app` runs PHP 8.3 FPM with `pdo_mysql`, Composer, and Smarty;
-- `db` runs MySQL 8.4 and stores its data in a named Docker volume.
+All application routes are defined in `config/routes.php`. The file receives the router and controller instances through a typed registration function. Route patterns are anchored automatically and may contain named regular-expression groups:
 
-Nginx forwards requests that do not match a static file to `public/index.php`. Routing can therefore be added later without changing the web server configuration.
-
-## Composer commands
-
-Inspect installed dependencies inside the PHP container:
-
-```bash
-docker compose exec app composer show
+```php
+$router->get(
+    '/posts/(?P<slug>[a-z0-9-]+)',
+    static fn (Request $request, string $slug): Response => new Response($slug),
+);
 ```
 
-Check the entry point syntax:
+Named matches are passed to the route handler by parameter name. A controller method uses the same signature:
 
-```bash
-docker compose exec app php -l public/index.php
+```php
+public function show(Request $request, string $slug): Response
+{
+    return new Response($slug);
+}
 ```
 
-The `composer.lock` file pins dependency versions and must be committed to the repository.
+One optional trailing slash is accepted. A missing path returns `404 Not Found`. A path that exists for another HTTP method returns `405 Method Not Allowed` with an `Allow` response header.
+
+## SCSS
+
+SCSS is compiled in PHP with `scssphp/scssphp`; the project does not require npm or Node.js. The package is a development dependency and the generated CSS is committed to the repository so the production image can install Composer dependencies with `--no-dev`.
+
+Build CSS once:
+
+```bash
+docker compose exec app composer scss:build
+```
+
+Watch all files under `assets/scss` and rebuild after changes:
+
+```bash
+docker compose exec app composer scss:watch
+```
+
+The entry file is `assets/scss/app.scss`. It is compiled to `public/assets/css/app.css`. Do not edit the generated CSS directly.
+
+## Tests and checks
+
+Run the router tests:
+
+```bash
+docker compose exec app composer test
+```
+
+Compile SCSS and run all tests:
+
+```bash
+docker compose exec app composer check
+```
+
+## Project structure
+
+```text
+.
+├── assets/
+│   └── scss/                       # SCSS source files
+├── bin/
+│   ├── compile-scss.php            # One-time SCSS compiler
+│   └── watch-scss.php              # SCSS development watcher
+├── config/
+│   └── routes.php                  # HTTP route definitions
+├── docker/
+│   └── nginx/default.conf          # Nginx virtual host
+├── public/
+│   ├── assets/css/app.css          # Generated stylesheet
+│   └── index.php                   # HTTP front controller
+├── runtime/
+│   ├── cache/                      # Smarty cache
+│   └── compile/                    # Compiled Smarty templates
+├── src/
+│   ├── Assets/                     # Asset build services
+│   ├── Controller/                 # MVC controllers
+│   ├── Http/                       # Request and Response objects
+│   ├── Routing/                    # Regex router and route exceptions
+│   ├── View/                       # Smarty integration
+│   └── Application.php             # Application composition root
+├── templates/
+│   ├── errors/                     # HTTP error views
+│   ├── layouts/                    # Shared Smarty layouts
+│   └── pages/                      # Page templates
+├── tests/                          # Dependency-free unit tests
+├── compose.development.yml         # Development services and mounts
+├── compose.yaml                    # Base application services
+├── composer.json                   # PHP dependencies and commands
+└── Dockerfile                      # PHP-FPM image
+```
+
+The `public` directory is the only HTTP document root. Application code, templates, Composer files, and environment configuration cannot be requested directly from the web server.

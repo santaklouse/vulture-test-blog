@@ -9,6 +9,22 @@ services:
       - -c
       - composer install --no-interaction --no-progress && php-fpm
 
+  phpmyadmin:
+    restart: unless-stopped
+    image: 'phpmyadmin:latest'
+    ports:
+      - '127.0.0.1:8082:80'
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      PMA_ARBITRARY: 1
+      PMA_HOST: db
+      PMA_USER: '${DB_USERNAME}'
+      PMA_PASSWORD: '${DB_PASSWORD}'
+      PMA_PMADB: '${DB_DATABASE}'
+      UPLOAD_LIMIT: 500M
+    depends_on:
+      - db
+
 volumes:
   composer_vendor:
   smarty_runtime:
