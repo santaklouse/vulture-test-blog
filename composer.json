@@ -26,6 +26,7 @@
         "sort-packages": true
     },
     "scripts": {
+        "db:seed": "@php bin/seed.php",
         "scss:build": "@php bin/compile-scss.php",
         "scss:watch": "@php bin/watch-scss.php",
         "test": "@php tests/run.php",

@@ -31,6 +31,12 @@ Build and start the project:
 docker compose up --build -d
 ```
 
+Add development categories and posts:
+
+```bash
+docker compose exec app composer db:seed
+```
+
 Open [http://localhost:8080](http://localhost:8080) in a browser. If `WEB_PORT` is changed, use the configured port instead.
 
 Follow logs from all services:
@@ -56,6 +62,16 @@ The initial schema contains:
 - `post_categories` for the many-to-many relationship between posts and categories.
 
 Foreign keys in `post_categories` use `ON DELETE CASCADE`, so deleting a post or category also removes its relationship rows.
+
+### Database seeding
+
+The seed command creates four categories, twelve posts, and their many-to-many relationships:
+
+```bash
+docker compose exec app composer db:seed
+```
+
+Seed records are identified by their unique slugs. The command can be run again to update the same records without creating duplicates.
 
 ### Regex routes
 
@@ -119,11 +135,13 @@ docker compose exec app composer check
 │   └── scss/                       # SCSS source files
 ├── bin/
 │   ├── compile-scss.php            # One-time SCSS compiler
+│   ├── seed.php                    # Database seeding command
 │   └── watch-scss.php              # SCSS development watcher
 ├── config/
 │   └── routes.php                  # HTTP route definitions
 ├── database/
-│   └── schema.sql                  # Initial MySQL schema
+│   ├── schema.sql                  # Initial MySQL schema
+│   └── seed.php                    # Development seed data
 ├── docker/
 │   └── nginx/default.conf          # Nginx virtual host
 ├── public/
@@ -137,6 +155,8 @@ docker compose exec app composer check
 │   ├── Controller/                 # MVC controllers
 │   ├── Database/                   # PDO configuration and connection factory
 │   ├── Http/                       # Request and Response objects
+│   ├── Model/                      # Blog data models
+│   ├── Repository/                 # PDO data access
 │   ├── Routing/                    # Regex router and route exceptions
 │   ├── View/                       # Smarty integration
 │   └── Application.php             # Application composition root
