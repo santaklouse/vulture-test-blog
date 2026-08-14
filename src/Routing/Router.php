@@ -24,6 +24,14 @@ final class Router
         return $this->add('POST', $pattern, $handler);
     }
 
+    /**
+     * Registers a route for an HTTP method and regular-expression path pattern
+     *
+     * @param string $method
+     * @param string $pattern
+     * @param callable $handler
+     * @return self
+     */
     public function add(string $method, string $pattern, callable $handler): self
     {
         $this->routes[] = new Route($method, $pattern, $handler);
@@ -31,6 +39,12 @@ final class Router
         return $this;
     }
 
+    /**
+     * Finds and executes the first route matching the request path and method
+     *
+     * @param Request $request
+     * @return Response
+     */
     public function dispatch(Request $request): Response
     {
         $allowedMethods = [];

@@ -14,6 +14,8 @@ abstract class AbstractController
     }
 
     /**
+     * Renders a template with the requested HTTP response metadata.
+     *
      * @param array<string, mixed> $data
      * @param array<string, string> $headers
      */
@@ -31,12 +33,17 @@ abstract class AbstractController
         return (new \ReflectionClass($this))->getShortName();
     }
 
+    /**
+     * Derives the template directory name from the controller class name.
+     */
     final protected function getControllerTemplatePathName():string
     {
         return strtolower(str_replace('Controller', '', $this->getControllerName()));
     }
 
     /**
+     * Renders a template resolved from the current controller and action names.
+     *
      * @param array<string, mixed> $data
      * @param array<string, string> $headers
      */
@@ -54,4 +61,3 @@ abstract class AbstractController
         return $this->render($templatePath, $data, $statusCode, $headers);
     }
 }
-

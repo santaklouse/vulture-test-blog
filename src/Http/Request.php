@@ -7,6 +7,8 @@ namespace App\Http;
 final class Request
 {
     /**
+     * Creates an representation of an HTTP request
+     *
      * @param array<string, mixed> $query
      * @param array<string, mixed> $parsedBody
      * @param array<string, mixed> $server
@@ -20,6 +22,11 @@ final class Request
     ) {
     }
 
+    /**
+     * Creates a request from PHP superglobal values
+     *
+     * @return Request
+     */
     public static function fromGlobals(): self
     {
         $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
@@ -40,6 +47,11 @@ final class Request
         return strtoupper($this->method);
     }
 
+    /**
+     * Returns a normalized absolute request path
+     *
+     * @return string
+     */
     public function getPath(): string
     {
         if ($this->path === '') {
@@ -54,7 +66,9 @@ final class Request
         return $this->query[$key] ?? $default;
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @return array<string, mixed>
+     */
     public function getQueryParams(): array
     {
         return $this->query;
@@ -70,4 +84,3 @@ final class Request
         return $this->server[$key] ?? $default;
     }
 }
-

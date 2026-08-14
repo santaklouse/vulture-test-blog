@@ -10,6 +10,9 @@ use ScssPhp\ScssPhp\OutputStyle;
 
 final class ScssCompiler
 {
+    /**
+     * Compiles the SCSS to CSS
+     */
     public function compile(string $inputFile, string $outputFile): void
     {
         if (!is_file($inputFile)) {
@@ -41,4 +44,3 @@ final class ScssCompiler
         }
     }
 }
-

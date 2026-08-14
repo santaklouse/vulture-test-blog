@@ -35,7 +35,12 @@ final class Route
         return $this->method;
     }
 
-    /** @return array<string, string>|null */
+    /**
+     * Extracts named parameters when the request path matches this route.
+     *
+     * @param string $path
+     * @return array<string, string>|null
+     */
     public function match(string $path): ?array
     {
         $result = preg_match($this->compiledPattern, $path, $matches, PREG_UNMATCHED_AS_NULL);
@@ -44,18 +49,19 @@ final class Route
             return null;
         }
 
-        $parameters = [];
-
-        foreach ($matches as $name => $value) {
-            if (is_string($name) && is_string($value)) {
-                $parameters[$name] = $value;
-            }
-        }
+        $parameters = array_filter($matches, function ($value, $name) {
+            return is_string($name) && is_string($value);
+        }, ARRAY_FILTER_USE_BOTH);
 
         return $parameters;
     }
 
-    /** @param array<string, string> $parameters */
+    /**
+     * Invokes the route handler with the request and extracted parameters
+     *
+     * @param array<string, string> $parameters
+     * @return Response
+     */
     public function dispatch(Request $request, array $parameters): Response
     {
         $arguments = [$request];
@@ -73,6 +79,9 @@ final class Route
         return $response;
     }
 
+    /**
+     * Validates route pattern
+     */
     private function compilePattern(string $pattern): string
     {
         if ($pattern === '' || !str_starts_with($pattern, '/')) {
@@ -93,4 +102,3 @@ final class Route
         return $compiledPattern;
     }
 }
-

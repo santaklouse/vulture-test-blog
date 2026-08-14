@@ -31,11 +31,17 @@ final class Application
         $this->loadRoutes($homeController);
     }
 
+    /**
+     * Runs the application for the current HTTP request
+     */
     public function run(): void
     {
         $this->handle(Request::fromGlobals())->send();
     }
 
+    /**
+     * Dispatches a request and converts routing or application errors into responses
+     */
     public function handle(Request $request): Response
     {
         try {
@@ -56,6 +62,9 @@ final class Application
         }
     }
 
+    /**
+     * Loads the central route definitions and registers their controller handlers
+     */
     private function loadRoutes(HomeController $homeController): void
     {
         $routesFile = $this->projectRoot . '/config/routes.php';

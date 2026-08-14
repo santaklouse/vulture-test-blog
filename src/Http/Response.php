@@ -8,7 +8,11 @@ use InvalidArgumentException;
 
 final class Response
 {
-    /** @param array<string, string> $headers */
+    /**
+     * Creates an HTTP response with a validated status code.
+     *
+     * @param array<string, string> $headers
+     */
     public function __construct(
         private readonly string $body = '',
         private readonly int $statusCode = 200,
@@ -19,6 +23,9 @@ final class Response
         }
     }
 
+    /**
+     * Sends the status, headers, and response body to the client.
+     */
     public function send(): void
     {
         http_response_code($this->statusCode);
@@ -40,10 +47,11 @@ final class Response
         return $this->statusCode;
     }
 
-    /** @return array<string, string> */
+    /**
+     * @return array<string, string>
+     */
     public function getHeaders(): array
     {
         return $this->headers;
     }
 }
-

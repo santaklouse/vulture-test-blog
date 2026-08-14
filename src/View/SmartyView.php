@@ -12,6 +12,9 @@ final class SmartyView
 {
     private readonly Smarty $smarty;
 
+    /**
+     * Configures Smarty template and writable runtime directories.
+     */
     public function __construct(string $projectRoot)
     {
         $compileDirectory = $projectRoot . '/runtime/compile';
@@ -27,6 +30,8 @@ final class SmartyView
     }
 
     /**
+     * Renders a Smarty template into an HTML response.
+     *
      * @param array<string, mixed> $data
      * @param array<string, string> $headers
      */

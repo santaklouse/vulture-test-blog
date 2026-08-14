@@ -9,6 +9,9 @@ use App\Http\Response;
 
 final class ErrorController extends AbstractController
 {
+    /**
+     * Renders a response for an unknown path.
+     */
     public function notFound(Request $request): Response
     {
         return $this->render('errors/error', [
@@ -18,7 +21,11 @@ final class ErrorController extends AbstractController
         ], 404);
     }
 
-    /** @param list<string> $allowedMethods */
+    /**
+     * Renders a response when the path exists but the HTTP method is unsupported.
+     *
+     * @param list<string> $allowedMethods
+     */
     public function methodNotAllowed(Request $request, array $allowedMethods): Response
     {
         return $this->render('errors/error', [
@@ -34,6 +41,9 @@ final class ErrorController extends AbstractController
         ]);
     }
 
+    /**
+     * Renders a generic response for an unexpected application failure.
+     */
     public function internalServerError(Request $request): Response
     {
         return $this->render('errors/error', [
@@ -43,4 +53,3 @@ final class ErrorController extends AbstractController
         ], 500);
     }
 }
-

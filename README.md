@@ -45,6 +45,18 @@ Stop the project:
 docker compose down
 ```
 
+## Database schema
+
+When the `mysql_data` volume is initialized for the first time, the MySQL container creates the database and application user from the `DB_*` values in `.env`. It then imports `database/schema.sql` automatically. The schema file is not imported again when an existing data volume is reused.
+
+The initial schema contains:
+
+- `categories` for category names, descriptions, and URL slugs;
+- `posts` for article content, images, publication dates, and view counts;
+- `post_categories` for the many-to-many relationship between posts and categories.
+
+Foreign keys in `post_categories` use `ON DELETE CASCADE`, so deleting a post or category also removes its relationship rows.
+
 ### Regex routes
 
 All application routes are defined in `config/routes.php`. The file receives the router and controller instances through a typed registration function. Route patterns are anchored automatically and may contain named regular-expression groups:
@@ -110,6 +122,8 @@ docker compose exec app composer check
 │   └── watch-scss.php              # SCSS development watcher
 ├── config/
 │   └── routes.php                  # HTTP route definitions
+├── database/
+│   └── schema.sql                  # Initial MySQL schema
 ├── docker/
 │   └── nginx/default.conf          # Nginx virtual host
 ├── public/
@@ -121,6 +135,7 @@ docker compose exec app composer check
 ├── src/
 │   ├── Assets/                     # Asset build services
 │   ├── Controller/                 # MVC controllers
+│   ├── Database/                   # PDO configuration and connection factory
 │   ├── Http/                       # Request and Response objects
 │   ├── Routing/                    # Regex router and route exceptions
 │   ├── View/                       # Smarty integration

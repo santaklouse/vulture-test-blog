@@ -51,6 +51,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-vulture_password}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
     volumes:
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - mysql_data:/var/lib/mysql
     healthcheck:
       test: ["CMD-SHELL", "MYSQL_PWD=$${MYSQL_PASSWORD} mysqladmin ping --host=127.0.0.1 --user=$${MYSQL_USER} --silent"]

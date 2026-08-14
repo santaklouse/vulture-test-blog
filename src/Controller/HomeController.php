@@ -10,9 +10,11 @@ use Smarty\Smarty;
 
 final class HomeController extends AbstractController
 {
+    /**
+     * Renders the blog home page.
+     */
     public function index(Request $request): Response
     {
-
         return $this->renderControllerView('index', [
             'pageTitle' => 'Vulture Blog',
             'currentPath' => $request->getPath(),
@@ -21,4 +23,3 @@ final class HomeController extends AbstractController
         ]);
     }
 }
-
