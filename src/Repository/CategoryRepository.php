@@ -64,6 +64,40 @@ final class CategoryRepository
         return array_map($this->hydrate(...), $rows);
     }
 
+    /** Returns categories that contain published posts. */
+    public function findWithPublishedPosts(): array
+    {
+        $rows = $this->connection->query(<<<'SQL'
+            SELECT c.id, c.name, c.slug, c.description
+            FROM categories c
+            WHERE EXISTS (
+                SELECT 1
+                FROM post_categories pc
+                INNER JOIN posts p ON p.id = pc.post_id
+                WHERE pc.category_id = c.id
+                  AND p.published_at <= CURRENT_TIMESTAMP
+            )
+            ORDER BY c.name
+            SQL)->fetchAll();
+
+        return array_map($this->hydrate(...), $rows);
+    }
+
+    /** Returns categories assigned to a post. */
+    public function findByPostId(int $postId): array
+    {
+        $statement = $this->connection->prepare(<<<'SQL'
+            SELECT c.id, c.name, c.slug, c.description
+            FROM categories c
+            INNER JOIN post_categories pc ON pc.category_id = c.id
+            WHERE pc.post_id = :post_id
+            ORDER BY c.name
+            SQL);
+        $statement->execute(['post_id' => $postId]);
+
+        return array_map($this->hydrate(...), $statement->fetchAll());
+    }
+
     /** Creates a category model. */
     private function hydrate(array $row): Category
     {

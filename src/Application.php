@@ -5,9 +5,15 @@ declare(strict_types=1);
 namespace App;
 
 use App\Controller\ErrorController;
+use App\Controller\CategoryController;
 use App\Controller\HomeController;
+use App\Controller\PostController;
+use App\Database\ConnectionFactory;
+use App\Database\DatabaseConfig;
 use App\Http\Request;
 use App\Http\Response;
+use App\Repository\CategoryRepository;
+use App\Repository\PostRepository;
 use App\Routing\Exception\MethodNotAllowedException;
 use App\Routing\Exception\RouteNotFoundException;
 use App\Routing\Router;
@@ -24,11 +30,18 @@ final class Application
     public function __construct(private readonly string $projectRoot)
     {
         $view = new SmartyView($this->projectRoot);
-        $homeController = new HomeController($view);
+        $connection = (new ConnectionFactory(
+            DatabaseConfig::fromEnvironment(),
+        ))->create();
+        $categoryRepository = new CategoryRepository($connection);
+        $postRepository = new PostRepository($connection);
+        $homeController = new HomeController($view, $categoryRepository, $postRepository);
+        $categoryController = new CategoryController($view, $categoryRepository, $postRepository);
+        $postController = new PostController($view, $categoryRepository, $postRepository);
 
         $this->errorController = new ErrorController($view);
         $this->router = new Router();
-        $this->loadRoutes($homeController);
+        $this->loadRoutes($homeController, $categoryController, $postController);
     }
 
     /**
@@ -65,8 +78,11 @@ final class Application
     /**
      * Loads the central route definitions and registers their controller handlers
      */
-    private function loadRoutes(HomeController $homeController): void
-    {
+    private function loadRoutes(
+        HomeController $homeController,
+        CategoryController $categoryController,
+        PostController $postController,
+    ): void {
         $routesFile = $this->projectRoot . '/config/routes.php';
 
         if (!is_file($routesFile)) {
@@ -79,6 +95,11 @@ final class Application
             throw new RuntimeException(sprintf('Routes file must return a callable: %s', $routesFile));
         }
 
-        $registerRoutes($this->router, $homeController);
+        $registerRoutes(
+            $this->router,
+            $homeController,
+            $categoryController,
+            $postController,
+        );
     }
 }

@@ -36,7 +36,7 @@ return [
             'body' => 'A router does not need a framework to stay readable. Start by separating route registration from dispatching, anchor every regular expression, and pass named matches to controller actions. Clear 404 and 405 responses make the behavior predictable for both users and developers.',
             'views_count' => 184,
             'published_at' => '2026-08-01 09:00:00',
-            'categories' => ['php'],
+            'categories' => ['php', 'frontend'],
         ],
         [
             'image' => $cover,

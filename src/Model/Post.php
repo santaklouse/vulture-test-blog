@@ -19,4 +19,22 @@ final class Post
         public readonly DateTimeImmutable $publishedAt,
     ) {
     }
+
+    /**
+     * Converts a post to template-friendly values.
+     */
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'image' => $this->image,
+            'title' => $this->title,
+            'slug' => $this->slug,
+            'description' => $this->description,
+            'body' => $this->body,
+            'viewsCount' => $this->viewsCount,
+            'publishedAt' => $this->publishedAt->format('Y-m-d'),
+            'publishedAtLabel' => $this->publishedAt->format('M j, Y'),
+        ];
+    }
 }
