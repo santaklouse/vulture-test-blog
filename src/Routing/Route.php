@@ -49,16 +49,15 @@ final class Route
             return null;
         }
 
-        $parameters = array_filter($matches, function ($value, $name) {
+        return array_filter($matches, function ($value, $name) {
             return is_string($name) && is_string($value);
         }, ARRAY_FILTER_USE_BOTH);
-
-        return $parameters;
     }
 
     /**
      * Invokes the route handler with the request and extracted parameters
      *
+     * @param Request $request
      * @param array<string, string> $parameters
      * @return Response
      */

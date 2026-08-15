@@ -1,32 +1,37 @@
 {extends file="layouts/base.tpl"}
 
 {block name="content"}
-    <main class="page-shell article-page">
-        <nav class="breadcrumbs" aria-label="Breadcrumb">
-            <a href="/">Home</a>
-            {if $breadcrumbCategory}
-                <span aria-hidden="true">/</span>
-                <a href="/categories/{$breadcrumbCategory.slug|escape:'url'}">
-                    {$breadcrumbCategory.name|escape}
-                </a>
-            {/if}
-            <span aria-hidden="true">/</span>
-            <span aria-current="page">{$post.title|escape}</span>
+    <main class="container py-4 pb-5">
+        <nav aria-label="Breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                {if $breadcrumbCategory}
+                    <li class="breadcrumb-item">
+                        <a href="/categories/{$breadcrumbCategory.slug|escape:'url'}">
+                            {$breadcrumbCategory.name|escape}
+                        </a>
+                    </li>
+                {/if}
+                <li class="breadcrumb-item active" aria-current="page">{$post.title|escape}</li>
+            </ol>
         </nav>
 
-        <article class="article">
-            <header class="article__header">
+        <article class="article mx-auto">
+            <header class="text-center py-5">
                 {if $categories}
-                    <div class="category-chips">
+                    <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
                         {foreach $categories as $category}
-                            <a href="/categories/{$category.slug|escape:'url'}">{$category.name|escape}</a>
+                            <a
+                                class="badge rounded-pill text-bg-primary text-decoration-none"
+                                href="/categories/{$category.slug|escape:'url'}"
+                            >{$category.name|escape}</a>
                         {/foreach}
                     </div>
                 {/if}
 
-                <h1>{$post.title|escape}</h1>
-                <p class="article__lead">{$post.description|escape}</p>
-                <div class="article__meta">
+                <h1 class="display-3 fw-bold">{$post.title|escape}</h1>
+                <p class="lead text-body-secondary mx-auto mb-0">{$post.description|escape}</p>
+                <div class="d-flex justify-content-center gap-4 mt-4 text-body-secondary small text-uppercase">
                     <time datetime="{$post.publishedAt|escape}">{$post.publishedAtLabel|escape}</time>
                     <span>{$post.viewsCount|escape} views</span>
                 </div>
@@ -34,7 +39,7 @@
 
             {if $post.image}
                 <img
-                    class="article__image"
+                    class="article__image img-fluid rounded shadow-sm"
                     src="{$post.image|escape}"
                     alt=""
                     width="1200"
@@ -42,7 +47,7 @@
                 >
             {/if}
 
-            <div class="article__body">
+            <div class="article__body mt-5 mx-auto">
                 {foreach $post.bodyParagraphs as $paragraph}
                     <p>{$paragraph|escape}</p>
                 {/foreach}
@@ -50,14 +55,16 @@
         </article>
 
         {if $relatedPosts}
-            <section class="related-posts" aria-labelledby="related-posts-title">
-                <header class="related-posts__header">
-                    <span>Continue reading</span>
-                    <h2 id="related-posts-title">Related articles</h2>
+            <section class="border-top mt-5 pt-5" aria-labelledby="related-posts-title">
+                <header class="mb-4">
+                    <span class="text-primary fw-semibold text-uppercase small">Continue reading</span>
+                    <h2 class="h3 mt-2" id="related-posts-title">Related articles</h2>
                 </header>
-                <div class="post-grid">
+                <div class="row g-4">
                     {foreach $relatedPosts as $post}
-                        {include file="components/post-card.tpl" post=$post}
+                        <div class="col-12 col-md-6 col-xl-4">
+                            {include file="components/post-card.tpl" post=$post}
+                        </div>
                     {/foreach}
                 </div>
             </section>

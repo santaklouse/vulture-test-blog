@@ -1,6 +1,6 @@
 # Vulture Blog
 
-A test assignment implementing a small blog with plain PHP, MySQL, Smarty, and SCSS without a PHP framework.
+A test assignment implementing a small blog with plain PHP, MySQL, Smarty, Bootstrap, and SCSS without a PHP framework.
 
 ## Requirements
 
@@ -75,12 +75,12 @@ Seed records are identified by their unique slugs. The command can be run again 
 
 ### Regex routes
 
-All application routes are defined in `config/routes.php`. The file receives the router and controller instances through a typed registration function. Route patterns are anchored automatically and may contain named regular-expression groups:
+All application routes are defined in `config/routes.php`. The file receives only the router. Controllers are referenced by class name and resolved automatically. Route patterns are anchored automatically and may contain named regular-expression groups:
 
 ```php
 $router->get(
     '/posts/(?P<slug>[a-z0-9-]+)',
-    static fn (Request $request, string $slug): Response => new Response($slug),
+    [PostController::class, 'show'],
 );
 ```
 
@@ -152,6 +152,7 @@ docker compose exec app composer check
 │   └── compile/                    # Compiled Smarty templates
 ├── src/
 │   ├── Assets/                     # Asset build services
+│   ├── Container/                  # Lightweight dependency injection
 │   ├── Controller/                 # MVC controllers
 │   ├── Database/                   # PDO configuration and connection factory
 │   ├── Http/                       # Request and Response objects
@@ -161,6 +162,7 @@ docker compose exec app composer check
 │   ├── View/                       # Smarty integration
 │   └── Application.php             # Application composition root
 ├── templates/
+│   ├── components/                 # Reusable Smarty components
 │   ├── errors/                     # HTTP error views
 │   ├── layouts/                    # Shared Smarty layouts
 │   └── pages/                      # Page templates

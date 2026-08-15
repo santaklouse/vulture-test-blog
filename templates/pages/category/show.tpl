@@ -1,77 +1,84 @@
 {extends file="layouts/base.tpl"}
 
 {block name="content"}
-    <main class="page-shell page-content">
-        <nav class="breadcrumbs" aria-label="Breadcrumb">
-            <a href="/">Home</a>
-            <span aria-hidden="true">/</span>
-            <span>{$category.name|escape}</span>
+    <main class="container py-4 pb-5">
+        <nav aria-label="Breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{$category.name|escape}</li>
+            </ol>
         </nav>
 
-        <header class="page-heading">
-            <span class="page-heading__eyebrow">Category · {$totalPosts|escape} articles</span>
-            <h1>{$category.name|escape}</h1>
+        <header class="col-lg-8 py-5">
+            <span class="text-primary fw-semibold text-uppercase small">
+                Category · {$totalPosts|escape} articles
+            </span>
+            <h1 class="display-4 fw-bold mt-3">{$category.name|escape}</h1>
             {if $category.description}
-                <p>{$category.description|escape}</p>
+                <p class="lead text-body-secondary mb-0">{$category.description|escape}</p>
             {/if}
         </header>
 
-        <div class="listing-toolbar">
-            <span>Sort by</span>
-            <nav class="sort-tabs" aria-label="Article sorting">
+        <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 p-3 mb-4 bg-white border rounded">
+            <span class="fw-semibold">Sort by</span>
+            <nav class="btn-group" aria-label="Article sorting">
                 <a
-                    class="sort-tabs__link{if $sort === 'date'} sort-tabs__link--active{/if}"
+                    class="btn btn-sm {if $sort === 'date'}btn-primary{else}btn-outline-secondary{/if}"
                     href="{$sortLinks.date|escape}"
+                    {if $sort === 'date'}aria-current="page"{/if}
                 >Newest</a>
                 <a
-                    class="sort-tabs__link{if $sort === 'views'} sort-tabs__link--active{/if}"
+                    class="btn btn-sm {if $sort === 'views'}btn-primary{else}btn-outline-secondary{/if}"
                     href="{$sortLinks.views|escape}"
+                    {if $sort === 'views'}aria-current="page"{/if}
                 >Most viewed</a>
             </nav>
         </div>
 
         {if $posts}
-            <div class="post-grid post-grid--listing">
+            <div class="row g-4">
                 {foreach $posts as $post}
-                    {include file="components/post-card.tpl" post=$post}
+                    <div class="col-12 col-md-6 col-xl-4">
+                        {include file="components/post-card.tpl" post=$post}
+                    </div>
                 {/foreach}
             </div>
 
             {if $pagination.totalPages > 1}
-                <nav class="pagination" aria-label="Pagination">
-                    {if $pagination.previousUrl}
-                        <a class="pagination__link pagination__link--direction" href="{$pagination.previousUrl|escape}">
-                            Previous
-                        </a>
-                    {else}
-                        <span class="pagination__link pagination__link--direction pagination__link--disabled">Previous</span>
-                    {/if}
-
-                    <div class="pagination__pages">
+                <nav class="mt-5" aria-label="Pagination">
+                    <ul class="pagination justify-content-center flex-wrap">
+                        <li class="page-item{if !$pagination.previousUrl} disabled{/if}">
+                            {if $pagination.previousUrl}
+                                <a class="page-link" href="{$pagination.previousUrl|escape}">Previous</a>
+                            {else}
+                                <span class="page-link">Previous</span>
+                            {/if}
+                        </li>
                         {foreach $pagination.pages as $page}
                             {if $page.current}
-                                <span class="pagination__link pagination__link--current" aria-current="page">
-                                    {$page.number|escape}
-                                </span>
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">{$page.number|escape}</span>
+                                </li>
                             {else}
-                                <a class="pagination__link" href="{$page.url|escape}">{$page.number|escape}</a>
+                                <li class="page-item">
+                                    <a class="page-link" href="{$page.url|escape}">{$page.number|escape}</a>
+                                </li>
                             {/if}
                         {/foreach}
-                    </div>
-
-                    {if $pagination.nextUrl}
-                        <a class="pagination__link pagination__link--direction" href="{$pagination.nextUrl|escape}">
-                            Next
-                        </a>
-                    {else}
-                        <span class="pagination__link pagination__link--direction pagination__link--disabled">Next</span>
-                    {/if}
+                        <li class="page-item{if !$pagination.nextUrl} disabled{/if}">
+                            {if $pagination.nextUrl}
+                                <a class="page-link" href="{$pagination.nextUrl|escape}">Next</a>
+                            {else}
+                                <span class="page-link">Next</span>
+                            {/if}
+                        </li>
+                    </ul>
                 </nav>
             {/if}
         {else}
-            <section class="empty-state">
-                <h2>No articles yet</h2>
-                <p>This category does not contain published articles.</p>
+            <section class="alert alert-light border text-center py-5">
+                <h2 class="h4">No articles yet</h2>
+                <p class="mb-0">This category does not contain published articles.</p>
             </section>
         {/if}
     </main>

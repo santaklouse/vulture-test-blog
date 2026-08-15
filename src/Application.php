@@ -4,20 +4,17 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Container\Container;
 use App\Controller\ErrorController;
-use App\Controller\CategoryController;
-use App\Controller\HomeController;
-use App\Controller\PostController;
 use App\Database\ConnectionFactory;
 use App\Database\DatabaseConfig;
 use App\Http\Request;
 use App\Http\Response;
-use App\Repository\CategoryRepository;
-use App\Repository\PostRepository;
 use App\Routing\Exception\MethodNotAllowedException;
 use App\Routing\Exception\RouteNotFoundException;
 use App\Routing\Router;
 use App\View\SmartyView;
+use PDO;
 use RuntimeException;
 use Throwable;
 
@@ -29,24 +26,14 @@ final class Application
 
     public function __construct(private readonly string $projectRoot)
     {
-        $view = new SmartyView($this->projectRoot);
-        $connection = (new ConnectionFactory(
-            DatabaseConfig::fromEnvironment(),
-        ))->create();
-        $categoryRepository = new CategoryRepository($connection);
-        $postRepository = new PostRepository($connection);
-        $homeController = new HomeController($view, $categoryRepository, $postRepository);
-        $categoryController = new CategoryController($view, $categoryRepository, $postRepository);
-        $postController = new PostController($view, $categoryRepository, $postRepository);
+        $container = new Container();
+        $this->registerServices($container);
 
-        $this->errorController = new ErrorController($view);
-        $this->router = new Router();
-        $this->loadRoutes($homeController, $categoryController, $postController);
+        $this->errorController = $container->get(ErrorController::class);
+        $this->router = new Router($container);
+        $this->loadRoutes();
     }
 
-    /**
-     * Runs the application for the current HTTP request
-     */
     public function run(): void
     {
         $this->handle(Request::fromGlobals())->send();
@@ -75,14 +62,8 @@ final class Application
         }
     }
 
-    /**
-     * Loads the central route definitions and registers their controller handlers
-     */
-    private function loadRoutes(
-        HomeController $homeController,
-        CategoryController $categoryController,
-        PostController $postController,
-    ): void {
+    private function loadRoutes(): void
+    {
         $routesFile = $this->projectRoot . '/config/routes.php';
 
         if (!is_file($routesFile)) {
@@ -95,11 +76,16 @@ final class Application
             throw new RuntimeException(sprintf('Routes file must return a callable: %s', $routesFile));
         }
 
-        $registerRoutes(
-            $this->router,
-            $homeController,
-            $categoryController,
-            $postController,
-        );
+        $registerRoutes($this->router);
+    }
+
+    private function registerServices(Container $container): void
+    {
+        $connection = (new ConnectionFactory(
+            DatabaseConfig::fromEnvironment(),
+        ))->create();
+
+        $container->set(SmartyView::class, new SmartyView($this->projectRoot));
+        $container->set(PDO::class, $connection);
     }
 }

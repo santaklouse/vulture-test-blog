@@ -1,6 +1,39 @@
 @import "variables";
-@import "base";
-@import "components/status-card";
-@import "components/home";
-@import "components/category";
-@import "components/article";
+
+.site-brand {
+    color: $brand-color;
+
+    &:hover {
+        color: darken($brand-color, 10%);
+    }
+}
+
+.post-card-image {
+    width: 100%;
+    aspect-ratio: $media-ratio;
+    object-fit: cover;
+}
+
+.article {
+    max-width: $article-width;
+
+    &__image {
+        width: 100%;
+        aspect-ratio: $media-ratio;
+        object-fit: cover;
+    }
+
+    &__body {
+        max-width: $article-body-width;
+        font-size: 1.125rem;
+        line-height: 1.8;
+
+        p + p {
+            margin-top: 1.5rem;
+        }
+    }
+}
+
+.status-card {
+    max-width: 42rem;
+}
